@@ -1,5 +1,6 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const inputDate = document.querySelector('#datetime-picker');
 const startButton = document.querySelector('button[data-start]');
@@ -11,6 +12,8 @@ const refs = {
 };
 let timerID = null;
 
+startButton.addEventListener('click', onStartButtonClick);
+
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -18,27 +21,27 @@ const options = {
   minuteIncrement: 1,
   onClose(selectedDates) {
     if (selectedDates[0].getTime() <= Date.now()) {
-      startButton.setAttribute('disabled', 'true');
-      return window.alert('Please choose a date in the future');
+      return Notify.failure('Please choose a date in the future');
     } else {
-      startButton.removeAttribute('disabled', 'true');
-      startButton.addEventListener('click', onStartButtonClick);
+      changeElementAttributDisabled(startButton);
+      changeElementAttributDisabled(inputDate);
     }
   },
 };
 
 const fp = flatpickr(inputDate, options);
-startButton.setAttribute('disabled', 'true');
+changeElementAttributDisabled(startButton);
 
 function onStartButtonClick() {
-  startButton.setAttribute('disabled', 'true');
+  changeElementAttributDisabled(startButton);
   const selectedTime = fp.selectedDates[0].getTime();
   timerID = setInterval(() => {
     const currentTime = Date.now();
     const deltaTime = selectedTime - currentTime;
     if (deltaTime <= 1) {
       clearInterval(timerID);
-      return window.alert('Timeout complete');
+      changeElementAttributDisabled(inputDate);
+      return Notify.success('Congratulations! Timeout complete');
     }
     const time = convertMs(deltaTime);
     updateClockFace(time);
@@ -70,4 +73,10 @@ function updateClockFace({ days, hours, minutes, seconds }) {
   refs.hoursEl.textContent = `${hours}`;
   refs.minutesEl.textContent = `${minutes}`;
   refs.secondsEl.textContent = `${seconds}`;
+}
+
+function changeElementAttributDisabled(el) {
+  if (el.hasAttribute('disabled')) {
+    el.removeAttribute('disabled', 'true');
+  } else el.setAttribute('disabled', 'true');
 }
