@@ -29,7 +29,7 @@ function onPromiseCreate(evt) {
   if (refs.amount[0].value < 1) {
     return;
   }
-  for (i = 1; i <= refs.amount[0].value; i += 1) {
+  for (let i = 1; i <= refs.amount[0].value; i += 1) {
     createPromise(i, totalDelay)
       .then(({ position, delay }) => {
         return Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`);
